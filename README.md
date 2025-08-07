@@ -1,15 +1,10 @@
-# Azure AI Translation API PowerShell Toolkit
+# Azure AI Foundry Video Translation PowerShell Toolkit
 
-This PowerShell toolkit provides comprehensive support for Azure AI translation services, including both document translation and the new **Azure AI Foundry video translation** capabilities.
+This PowerShell toolkit provides comprehensive support for **Azure AI Foundry video translation** capabilities, enabling automated video translation workflows with subtitle generation and quality improvements.
 
 ## Features
 
-### Document Translation (Existing)
-- ✅ Check translation job status
-- ✅ Comprehensive error handling
-- ✅ JSON output for detailed analysis
-
-### Video Translation (NEW) 🎬
+### Video Translation 🎬
 - **Complete video translation workflow**
 - **Create translation objects and iterations**
 - **Monitor translation progress with real-time polling**
@@ -21,15 +16,10 @@ This PowerShell toolkit provides comprehensive support for Azure AI translation 
 
 ## Prerequisites
 
-### For Video Translation
 1. **Azure AI Foundry Speech resource** in a [supported region](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/video-translation-overview#supported-regions-and-languages)
 2. **PowerShell 5.1 or later**
 3. **Azure Blob Storage account** (for video files and WebVTT iterations)
 4. **Video file in MP4 format** (max 5GB, max 4 hours)
-
-### For Document Translation
-1. **Azure AI Translator resource**
-2. **PowerShell 5.1 or later**
 
 ## Quick Start: Video Translation
 
@@ -142,12 +132,8 @@ $env:AZURE_SPEECH_REGION = "your-region"  # e.g., "eastus"
 - **`Get-VideoTranslationStatus.ps1`** - Check status of translations/iterations
 - **`VideoTranslationHelpers.ps1`** - Helper functions library
 
-### Document Translation Scripts (Legacy)
-- **`Get-TranslationStatus.ps1`** - Document translation status checker
-
 ### Configuration Templates
 - **`video-config.example.ps1`** - Video translation configuration template
-- **`config.example.ps1`** - Document translation configuration template
 
 ## Parameters Reference
 
@@ -332,18 +318,3 @@ This toolkit implements the [Azure AI Video Translation REST API](https://learn.
 - **Least Privilege**: Use dedicated Speech service keys
 - **Data Retention**: Azure retains translation history for 31 days
 - **Regional Data**: Data processed in your specified Azure region
-
----
-
-## Legacy Document Translation
-
-### Usage
-After setting up your environment variables with `.\config.ps1`:
-
-```powershell
-.\Get-TranslationStatus.ps1 -JobId "your-job-id-here"
-```
-
-### Output
-- Console status summary
-- JSON file with detailed API response: `translation_status_{JobId}_{timestamp}.json`
