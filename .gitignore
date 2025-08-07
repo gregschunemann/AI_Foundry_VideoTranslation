@@ -1,4 +1,5 @@
-video.config.ps1
+video-config.ps1
 translation_creation_*
+iteration_*
 *.mp4
 *.vtt
