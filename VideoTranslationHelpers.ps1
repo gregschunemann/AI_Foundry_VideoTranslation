@@ -617,19 +617,36 @@ function Get-VideoTranslationResults {
         }
     }
     
+    # Create organized folder structure
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $translationFolderName = "VideoTranslation_${TranslationId}_${timestamp}"
+    $translationFolder = Join-Path $OutputDirectory $translationFolderName
+    $videosFolder = Join-Path $translationFolder "Videos"
+    $subtitlesFolder = Join-Path $translationFolder "Subtitles"
+    $metadataFolder = Join-Path $translationFolder "Metadata"
+    
+    # Create the folder structure
+    foreach ($folder in @($translationFolder, $videosFolder, $subtitlesFolder, $metadataFolder)) {
+        if (-not (Test-Path $folder)) {
+            New-Item -Path $folder -ItemType Directory -Force | Out-Null
+        }
+    }
+    
+    Write-Host "Created download folder structure:" -ForegroundColor Cyan
+    Write-Host "  📁 $translationFolderName/" -ForegroundColor White
+    Write-Host "    📁 Videos/" -ForegroundColor White
+    Write-Host "    📁 Subtitles/" -ForegroundColor White
+    Write-Host "    📁 Metadata/" -ForegroundColor White
+    Write-Host ""
+    
     $downloadedFiles = @()
     $errors = @()
-    
-    # Ensure output directory exists
-    if (-not (Test-Path $OutputDirectory)) {
-        New-Item -Path $OutputDirectory -ItemType Directory -Force | Out-Null
-    }
     
     # Download translated video
     if ($iterationStatus.Result.translatedVideoFileUrl) {
         try {
             $videoFilename = "translated_video_${TranslationId}_${IterationId}.mp4"
-            $videoPath = Join-Path $OutputDirectory $videoFilename
+            $videoPath = Join-Path $videosFolder $videoFilename
             
             Write-Host "Downloading translated video..." -ForegroundColor Yellow
             Invoke-WebRequest -Uri $iterationStatus.Result.translatedVideoFileUrl -OutFile $videoPath
@@ -644,7 +661,7 @@ function Get-VideoTranslationResults {
     if ($iterationStatus.Result.sourceLocaleSubtitleWebvttFileUrl) {
         try {
             $sourceSubtitlesFilename = "source_subtitles_${TranslationId}_${IterationId}.vtt"
-            $sourceSubtitlesPath = Join-Path $OutputDirectory $sourceSubtitlesFilename
+            $sourceSubtitlesPath = Join-Path $subtitlesFolder $sourceSubtitlesFilename
             
             Write-Host "Downloading source subtitles..." -ForegroundColor Yellow
             Invoke-WebRequest -Uri $iterationStatus.Result.sourceLocaleSubtitleWebvttFileUrl -OutFile $sourceSubtitlesPath
@@ -659,7 +676,7 @@ function Get-VideoTranslationResults {
     if ($iterationStatus.Result.targetLocaleSubtitleWebvttFileUrl) {
         try {
             $targetSubtitlesFilename = "target_subtitles_${TranslationId}_${IterationId}.vtt"
-            $targetSubtitlesPath = Join-Path $OutputDirectory $targetSubtitlesFilename
+            $targetSubtitlesPath = Join-Path $subtitlesFolder $targetSubtitlesFilename
             
             Write-Host "Downloading target subtitles..." -ForegroundColor Yellow
             Invoke-WebRequest -Uri $iterationStatus.Result.targetLocaleSubtitleWebvttFileUrl -OutFile $targetSubtitlesPath
@@ -674,7 +691,7 @@ function Get-VideoTranslationResults {
     if ($iterationStatus.Result.metadataJsonWebvttFileUrl) {
         try {
             $metadataFilename = "metadata_${TranslationId}_${IterationId}.vtt"
-            $metadataPath = Join-Path $OutputDirectory $metadataFilename
+            $metadataPath = Join-Path $metadataFolder $metadataFilename
             
             Write-Host "Downloading metadata..." -ForegroundColor Yellow
             Invoke-WebRequest -Uri $iterationStatus.Result.metadataJsonWebvttFileUrl -OutFile $metadataPath
@@ -689,7 +706,7 @@ function Get-VideoTranslationResults {
     try {
         $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
         $detailsFilename = "iteration_details_${TranslationId}_${IterationId}_${timestamp}.json"
-        $detailsPath = Join-Path $OutputDirectory $detailsFilename
+        $detailsPath = Join-Path $metadataFolder $detailsFilename
         
         $iterationStatus | ConvertTo-Json -Depth 10 | Out-File -FilePath $detailsPath -Encoding UTF8
         $downloadedFiles += $detailsPath
@@ -703,6 +720,7 @@ function Get-VideoTranslationResults {
         Files = $downloadedFiles
         Errors = $errors
         Error = if ($errors.Count -gt 0) { $errors -join "; " } else { $null }
+        DownloadFolder = $translationFolder
     }
 }
 

@@ -16,7 +16,10 @@ param(
     [string]$IterationId,
     
     [Parameter(Mandatory = $false)]
-    [string]$OutputDirectory = $PSScriptRoot
+    [string]$OutputDirectory = $PSScriptRoot,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$OutputRootDirectory = $PSScriptRoot
 )
 
 # Import required modules and functions
@@ -34,14 +37,14 @@ Write-Host "Downloading Video Translation Results" -ForegroundColor Green
 Write-Host "====================================" -ForegroundColor Green
 Write-Host "Translation ID: $TranslationId" -ForegroundColor Cyan
 Write-Host "Iteration ID: $IterationId" -ForegroundColor Cyan
-Write-Host "Output Directory: $OutputDirectory" -ForegroundColor Cyan
+Write-Host "Output Root Directory: $OutputRootDirectory" -ForegroundColor Cyan
 Write-Host ""
 
 try {
     # Download the results
     Write-Host "Fetching translation results..." -ForegroundColor Yellow
     
-    $downloadResult = Get-VideoTranslationResults -TranslationId $TranslationId -IterationId $IterationId -Config $config -OutputDirectory $OutputDirectory
+    $downloadResult = Get-VideoTranslationResults -TranslationId $TranslationId -IterationId $IterationId -Config $config -OutputDirectory $OutputRootDirectory
     
     if ($downloadResult.Success) {
         Write-Host "Download completed successfully!" -ForegroundColor Green
@@ -110,7 +113,7 @@ try {
         Write-Host "Translation ID: $TranslationId" -ForegroundColor Cyan
         Write-Host "Iteration ID: $IterationId" -ForegroundColor Cyan
         Write-Host "Files Downloaded: $($downloadResult.Files.Count)" -ForegroundColor Green
-        Write-Host "Download Location: $OutputDirectory" -ForegroundColor Cyan
+        Write-Host "Download Location: $($downloadResult.DownloadFolder)" -ForegroundColor Cyan
         
         Write-Host "`nNext Steps:" -ForegroundColor Yellow
         Write-Host "1. Review the translated video file" -ForegroundColor White

@@ -153,25 +153,39 @@ $env:AZURE_SPEECH_REGION = "your-region"  # e.g., "eastus"
 | `EnableLipSync` | Boolean | ❌ | Enable lip synchronization (default: false) |
 | `AutoCreateIteration` | Switch | ❌ | Automatically create first iteration |
 | `AutoDownload` | Switch | ❌ | Automatically download results |
+| `OutputRootDirectory` | String | ❌ | Root directory for organized downloads |
 | `PollingIntervalSeconds` | Integer | ❌ | Status check interval (default: 30) |
 | `MaxWaitTimeMinutes` | Integer | ❌ | Maximum wait time (default: 60) |
 
 ## Output Files
 
-When you run the video translation workflow, you'll get several types of files:
+When you run the video translation workflow, files are automatically organized into a structured folder system:
 
-### 📥 Downloaded Results
+### 📁 Organized Folder Structure
+```
+VideoTranslation_{TranslationId}_{Timestamp}/
+├── 📁 Videos/
+│   └── translated_video_{TranslationId}_{IterationId}.mp4
+├── 📁 Subtitles/
+│   ├── source_subtitles_{TranslationId}_{IterationId}.vtt
+│   └── target_subtitles_{TranslationId}_{IterationId}.vtt
+└── 📁 Metadata/
+    ├── metadata_{TranslationId}_{IterationId}.vtt
+    └── iteration_details_{TranslationId}_{IterationId}_{Timestamp}.json
+```
+
+### 📥 File Types
 - **`translated_video_*.mp4`** - The translated video file
 - **`source_subtitles_*.vtt`** - Source language subtitles (WebVTT format)
 - **`target_subtitles_*.vtt`** - Target language subtitles (WebVTT format)  
 - **`metadata_*.vtt`** - WebVTT with JSON metadata for editing
 
 ### 📊 Status & Tracking Files
-- **`translation_creation_*.json`** - Translation object creation response
-- **`iteration_creation_*.json`** - Iteration creation responses
-- **`iteration_details_*.json`** - Complete iteration details
-- **`translation_status_*.json`** - Translation status snapshots
-- **`iteration_status_*.json`** - Iteration status snapshots
+- **`iteration_details_*.json`** - Complete iteration details and API responses
+- **`translation_creation_*.json`** - Translation object creation response (created in script directory)
+- **`iteration_creation_*.json`** - Iteration creation responses (created in script directory)
+- **`translation_status_*.json`** - Translation status snapshots (created in script directory)
+- **`iteration_status_*.json`** - Iteration status snapshots (created in script directory)
 
 ## Error Handling & Best Practices
 
@@ -208,7 +222,7 @@ When you run the video translation workflow, you'll get several types of files:
   -AutoDownload
 ```
 
-### Example 2: Custom Settings
+### Example 2: Custom Settings with Organized Downloads
 ```powershell
 .\Start-VideoTranslation.ps1 `
   -VideoFileUrl "https://example.com/meeting.mp4" `
@@ -219,7 +233,10 @@ When you run the video translation workflow, you'll get several types of files:
   -SpeakerCount 5 `
   -SubtitleMaxCharCountPerSegment 30 `
   -ExportSubtitleInVideo $true `
-  -EnableLipSync $true
+  -EnableLipSync $true `
+  -OutputRootDirectory "C:\VideoTranslations" `
+  -AutoCreateIteration `
+  -AutoDownload
 ```
 
 ### Example 3: Manual Workflow with Quality Control

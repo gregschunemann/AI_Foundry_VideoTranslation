@@ -31,6 +31,9 @@ param(
     [string]$OutputDirectory = $PSScriptRoot,
     
     [Parameter(Mandatory = $false)]
+    [string]$OutputRootDirectory,
+    
+    [Parameter(Mandatory = $false)]
     [switch]$AutoDownload,
     
     [Parameter(Mandatory = $false)]
@@ -42,6 +45,9 @@ param(
 
 # Import required modules and functions
 . "$PSScriptRoot\VideoTranslationHelpers.ps1"
+
+# Use OutputRootDirectory if specified, otherwise use OutputDirectory for backward compatibility
+$DownloadDirectory = if ($OutputRootDirectory) { $OutputRootDirectory } else { $OutputDirectory }
 
 # Initialize configuration
 $config = Initialize-VideoTranslationConfig -Endpoint $Endpoint -SubscriptionKey $SubscriptionKey -Region $Region
@@ -133,16 +139,17 @@ try {
     if ($AutoDownload) {
         Write-Host "`nDownloading results..." -ForegroundColor Yellow
         
-        $downloadResult = Get-VideoTranslationResults -TranslationId $TranslationId -IterationId $IterationId -Config $config -OutputDirectory $OutputDirectory
+        $downloadResult = Get-VideoTranslationResults -TranslationId $TranslationId -IterationId $IterationId -Config $config -OutputDirectory $DownloadDirectory
         
         if ($downloadResult.Success) {
             Write-Host "Download completed successfully!" -ForegroundColor Green
-            Write-Host "Files downloaded to: $OutputDirectory" -ForegroundColor Cyan
+            Write-Host "Files downloaded to: $($downloadResult.DownloadFolder)" -ForegroundColor Cyan
             
             if ($downloadResult.Files.Count -gt 0) {
                 Write-Host "`nDownloaded files:" -ForegroundColor Cyan
                 foreach ($file in $downloadResult.Files) {
-                    Write-Host "  - $(Split-Path $file -Leaf)" -ForegroundColor White
+                    $relativePath = $file.Replace($downloadResult.DownloadFolder, "").TrimStart('\')
+                    Write-Host "  - $relativePath" -ForegroundColor White
                 }
             }
         } else {
@@ -164,7 +171,7 @@ try {
     
     if ($AutoDownload) {
         Write-Host "Files Downloaded: Yes" -ForegroundColor Green
-        Write-Host "Download Location: $OutputDirectory" -ForegroundColor Cyan
+        Write-Host "Download Location: Check the VideoTranslation folder created" -ForegroundColor Cyan
     } else {
         Write-Host "Files Downloaded: No" -ForegroundColor Yellow
     }
@@ -173,7 +180,7 @@ try {
     if (-not $AutoDownload) {
         Write-Host "1. Download results: Get-VideoTranslationResults -TranslationId '$TranslationId' -IterationId '$IterationId'" -ForegroundColor White
     } else {
-        Write-Host "1. Review downloaded files in: $OutputDirectory" -ForegroundColor White
+        Write-Host "1. Review downloaded files in the created VideoTranslation folder" -ForegroundColor White
     }
     Write-Host "2. Create additional iterations for quality improvements if needed" -ForegroundColor White
     Write-Host "3. Use the WebVTT metadata file to make targeted edits for subsequent iterations" -ForegroundColor White
